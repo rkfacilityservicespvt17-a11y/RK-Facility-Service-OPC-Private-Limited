@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RK HR-AI Interview Coach</title>
+<style>
+body{margin:0;font-family:Arial;background:#f1f5f9;color:#0f172a}
+header{background:#0f172a;color:white;padding:25px 18px}
+main{max-width:700px;margin:auto;padding:16px}
+.card{background:white;padding:20px;margin:15px 0;border-radius:18px}
+select,textarea,button{width:100%;padding:13px;margin:8px 0;border-radius:10px;font-size:16px}
+button{background:#2563eb;color:white;border:0;font-weight:bold}
+.secondary{background:#e2e8f0;color:#111}
+.hidden{display:none}
+.question{font-size:21px;font-weight:bold;line-height:1.5}
+.score{font-size:42px;font-weight:bold;text-align:center}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>🤖 RK HR-AI Interview Coach</h1>
+<p>Practice • Mock Interview • Feedback • Score</p>
+</header>
+
+<main>
+
+<div id="setup" class="card">
+<h2>Start Your Interview</h2>
+
+<label>Job / Position</label>
+<select id="role">
+<option>F&B Service / Waiter</option>
+<option>Front Office</option>
+<option>Housekeeping</option>
+<option>Chef / Kitchen</option>
+<option>Facility Management</option>
+<option>Security</option>
+<option>Supervisor</option>
+<option>Lab Attendant / MTS</option>
+</select>
+
+<label>Language</label>
+<select id="language">
+<option>Hindi</option>
+<option>English</option>
+<option>Hinglish</option>
+</select>
+
+<button onclick="startInterview()">🚀 Start Mock Interview</button>
+</div>
+
+<div id="interview" class="card hidden">
+<p id="progress"></p>
+<div id="question" class="question"></div>
+
+<button class="secondary" onclick="speakQuestion()">🔊 Listen Question</button>
+
+<textarea id="answer" rows="7"
+placeholder="Type your answer here..."></textarea>
+
+<button class="secondary" onclick="voiceAnswer()">🎙️ Voice Answer</button>
+
+<button onclick="submitAnswer()">Submit Answer</button>
+
+<div id="feedback"></div>
+</div>
+
+<div id="result" class="card hidden">
+<h2>📊 Interview Report</h2>
+
+<div id="score" class="score"></div>
+
+<p id="details"></p>
+
+<h3>AI Feedback</h3>
+<p id="advice"></p>
+
+<button onclick="location.reload()">🔄 Practice Again</button>
+</div>
+
+</main>
+
+<script>
+
+const questions={
+
+"F&B Service / Waiter":[
+"Tell me about yourself.",
+"What is Mise en Place?",
+"How would you handle an angry guest?",
+"Explain the sequence of service.",
+"What is the difference between à la carte and table d’hôte?"
+],
+
+"Front Office":[
+"Tell me about yourself.",
+"How would you handle a difficult guest?",
+"What is the check-in procedure?",
+"How do you protect guest privacy?",
+"How do you handle overbooking?"
+],
+
+"Housekeeping":[
+"Tell me about yourself.",
+"What is the room cleaning sequence?",
+"How do you handle a guest complaint?",
+"Why is PPE important?",
+"How do you report a maintenance issue?"
+],
+
+"Chef / Kitchen":[
+"Tell me about yourself.",
+"What is mise en place?",
+"How do you maintain food hygiene?",
+"What is cross-contamination?",
+"How do you work under pressure?"
+],
+
+"Facility Management":[
+"Tell me about yourself.",
+"What is facility management?",
+"How do you handle a client complaint?",
+"How do you supervise manpower?",
+"What is preventive maintenance?"
+],
+
+"Security":[
+"Tell me about yourself.",
+"What would you do during an emergency?",
+"How do you maintain an incident register?",
+"How do you handle an unauthorized visitor?",
+"What is access control?"
+],
+
+"Supervisor":[
+"Tell me about yourself.",
+"How do you manage a team?",
+"How do you handle absenteeism?",
+"How do you resolve employee conflict?",
+"How do you report daily work?"
+],
+
+"Lab Attendant / MTS":[
+"Tell me about yourself.",
+"What are the duties of an MTS or Lab Attendant?",
+"How do you maintain cleanliness and safety?",
+"How do you handle equipment carefully?",
+"How do you follow supervisor instructions?"
+]
+
+};
+
+let list=[];
+let current=0;
+let scores=[];
+
+function startInterview(){
+
+let role=document.getElementById("role").value;
+
+list=questions[role];
+current=0;
+scores=[];
+
+document.getElementById("setup").classList.add("hidden");
+document.getElementById("interview").classList.remove("hidden");
+
+showQuestion();
+}
+
+function showQuestion(){
+
+document.getElementById("progress").innerText=
+"Question "+(current+1)+" of "+list.length;
+
+document.getElementById("question").innerText=list[current];
+
+document.getElementById("answer").value="";
+document.getElementById("feedback").innerHTML="";
+}
+
+function speakQuestion(){
+
+let speech=new SpeechSynthesisUtterance(list[current]);
+speech.lang="en-IN";
+speechSynthesis.speak(speech);
+}
+
+function voiceAnswer(){
+
+let SpeechRecognition=
+window.SpeechRecognition ||
+window.webkitSpeechRecognition;
+
+if(!SpeechRecognition){
+
+alert("Voice input is not supported in this browser.");
+return;
+}
+
+let recognition=new SpeechRecognition();
+
+recognition.lang="en-IN";
+
+recognition.onresult=function(event){
+
+document.getElementById("answer").value=
+event.results[0][0].transcript;
+
+};
+
+recognition.start();
+}
+
+function submitAnswer(){
+
+let answer=document.getElementById("answer").value.trim();
+
+if(answer===""){
+
+alert("Please give your answer first.");
+return;
+}
+
+let score=5;
+
+if(answer.length>40)score+=2;
+if(answer.length>100)score+=1;
+
+if(/experience|skill|guest|customer|service|safety|team|hygiene|अनुभव|कौशल|ग्राहक|सेवा|सुरक्षा|टीम/i.test(answer))
+score+=1;
+
+score=Math.min(score,10);
+
+scores.push(score);
+
+document.getElementById("feedback").innerHTML=
+"<h3>Score: "+score+"/10</h3>"+
+"<p>"+(score>=8?
+"Excellent answer. Speak confidently in the real interview.":
+score>=6?
+"Good answer. Add your experience and one practical example.":
+"Improve the structure: Introduction → Skill → Example → Result.")+
+"</p>";
+
+setTimeout(function(){
+
+current++;
+
+if(current<list.length){
+
+showQuestion();
+
+}else{
+
+finishInterview();
+
+}
+
+},1000);
+
+}
+
+function finishInterview(){
+
+document.getElementById("interview").classList.add("hidden");
+
+document.getElementById("result").classList.remove("hidden");
+
+let total=scores.reduce((a,b)=>a+b,0);
+
+let average=total/scores.length;
+
+document.getElementById("score").innerText=
+Math.round(average*10)+"/100";
+
+document.getElementById("details").innerText=
+scores.map((x,i)=>"Question "+(i+1)+": "+x+"/10").join(" | ");
+
+document.getElementById("advice").innerText=
+average>=8?
+"Very good preparation. Focus on confidence and clear communication.":
+"Keep practicing. Improve your introduction, technical answers and real examples.";
+
+}
+
+</script>
+
+</body>
+  </html>
