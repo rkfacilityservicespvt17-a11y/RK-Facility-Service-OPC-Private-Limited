@@ -2,80 +2,488 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>RK HR-AI Interview & Placement Assistant</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RK HR-AI Voice Interview Coach</title>
 
 <style>
 *{box-sizing:border-box}
 body{
-  margin:0;font-family:Arial,sans-serif;
-  background:#f4f7fb;color:#172033
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f3f6fb;
+  color:#172033;
 }
 header{
   background:linear-gradient(135deg,#123c69,#1769aa);
-  color:white;padding:24px 16px;text-align:center
+  color:white;
+  padding:25px 15px;
+  text-align:center;
 }
-header h1{margin:0;font-size:25px}
-header p{margin:8px 0 0}
-main{max-width:800px;margin:auto;padding:16px}
+header h1{margin:0 0 8px}
+.container{
+  max-width:850px;
+  margin:auto;
+  padding:18px;
+}
 .card{
-  background:white;padding:20px;margin:15px 0;
-  border-radius:16px;box-shadow:0 3px 15px #0001
+  background:white;
+  padding:22px;
+  margin:15px 0;
+  border-radius:15px;
+  box-shadow:0 3px 15px #0001;
 }
-label{font-weight:bold;display:block;margin:12px 0 6px}
-select,textarea,input,button{
-  width:100%;padding:13px;border-radius:10px;
-  border:1px solid #ccd3dd;font-size:16px
+label{
+  display:block;
+  font-weight:bold;
+  margin:14px 0 7px;
+}
+input,select,button{
+  width:100%;
+  padding:13px;
+  border-radius:9px;
+  border:1px solid #ccd3dd;
+  font-size:16px;
 }
 button{
-  background:#1769aa;color:white;border:0;
-  font-weight:bold;margin-top:12px;cursor:pointer
+  border:0;
+  background:#1769aa;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+  margin-top:12px;
 }
-button.secondary{background:#e8eef5;color:#172033}
-button.green{background:#16834b}
-.hidden{display:none}
+button:hover{opacity:.9}
+.voice{
+  text-align:center;
+  font-size:55px;
+  margin:15px;
+}
+.status{
+  text-align:center;
+  font-weight:bold;
+  padding:12px;
+  border-radius:10px;
+  background:#eef5ff;
+}
 .question{
-  font-size:20px;font-weight:bold;line-height:1.5
+  font-size:22px;
+  font-weight:bold;
+  line-height:1.5;
+  text-align:center;
+  padding:20px;
 }
+.answer{
+  min-height:100px;
+  background:#f7f8fa;
+  padding:15px;
+  border-radius:10px;
+  margin-top:15px;
+}
+.hidden{display:none}
 .score{
-  font-size:42px;font-weight:bold;text-align:center;
-  color:#1769aa
+  font-size:35px;
+  font-weight:bold;
+  text-align:center;
 }
-.badge{
-  display:inline-block;background:#e8f2ff;
-  padding:8px 12px;border-radius:20px;margin:4px
+ul{line-height:1.8}
+.small{
+  color:#667085;
+  font-size:14px;
 }
-footer{text-align:center;padding:25px;color:#667}
 </style>
 </head>
 
 <body>
 
 <header>
-<h1>🤖 RK HR-AI Interview Coach</h1>
-<p>Interview • Placement • Career Preparation</p>
+<h1>🤖 RK HR-AI Voice Interview Coach</h1>
+<p>Real Voice Interview Practice</p>
 </header>
 
-<main>
+<div class="container">
 
 <div class="card" id="setup">
-<h2>🎯 Start Your Preparation</h2>
 
-<label>Job / Position</label>
-<select id="role">
-<option>F&B Service / Waiter</option>
+<h2>🎯 Interview Setup</h2>
+
+<label>Upload Resume</label>
+<input type="file" id="resume" accept=".pdf,.txt,.doc,.docx">
+
+<p class="small">
+Resume upload will be connected to AI resume analysis in the next backend version.
+</p>
+
+<label>Applying For</label>
+<select id="job">
+<option>F&B Service</option>
+<option>Facility Management</option>
+<option>Facility Supervisor</option>
 <option>Front Office</option>
 <option>Housekeeping</option>
 <option>Chef / Kitchen</option>
-<option>Facility Management</option>
 <option>Security</option>
-<option>Supervisor</option>
 <option>Lab Attendant / MTS</option>
 <option>HR / Administration</option>
 </select>
 
-<label>Language</label>
+<label>Interview Language</label>
 <select id="language">
-<option>English</option>
-<option>Hindi</option>
-<option>
+<option value="en-IN">English</option>
+<option value="hi-IN">Hindi</option>
+</select>
+
+<label>Interview Level</label>
+<select id="level">
+<option>Hard</option>
+<option>Expert</option>
+</select>
+
+<button onclick="startInterview()">🎙️ START VOICE INTERVIEW</button>
+
+</div>
+
+
+<div class="card hidden" id="interview">
+
+<div class="voice">🎙️</div>
+
+<div class="status" id="status">
+AI HR is preparing your interview...
+</div>
+
+<div class="question" id="question">
+Please wait...
+</div>
+
+<div class="answer">
+<strong>Your Voice Answer:</strong>
+<p id="answer">Listening...</p>
+</div>
+
+<button onclick="startListening()">🎤 ANSWER NOW</button>
+
+<button onclick="stopListening()">
+⏹️ STOP ANSWER
+</button>
+
+</div>
+
+
+<div class="card hidden" id="result">
+
+<h2>📊 Interview Report</h2>
+
+<div class="score" id="score">0/100</div>
+
+<p id="resultText"></p>
+
+<h3>Preparation Areas</h3>
+
+<ul>
+<li>Improve job-specific technical knowledge.</li>
+<li>Practice answering without hesitation.</li>
+<li>Give practical examples from your experience.</li>
+<li>Improve communication and confidence.</li>
+<li>Prepare for situation-based questions.</li>
+</ul>
+
+<button onclick="location.reload()">
+🔄 Practice Again
+</button>
+
+</div>
+
+</div>
+
+
+<script>
+
+let questions = [];
+let current = 0;
+let answers = [];
+let recognition;
+let interviewStarted = false;
+
+const jobQuestions = {
+
+"F&B Service":[
+"Good morning. Please introduce yourself and tell me about your F&B Service experience.",
+"You have experience in F&B Service. Explain your main responsibilities in your previous job.",
+"Explain the complete sequence of restaurant service from welcoming a guest to billing.",
+"A guest says that his food is delayed and becomes angry. How would you handle the situation?",
+"What is the difference between buffet service and a la carte service?",
+"Suppose a guest complains that the food is not prepared according to his requirement. What will you do?",
+"How would you maintain hygiene and food safety during restaurant service?",
+"If three tables require service at the same time, how would you prioritize your work?",
+"What is the most difficult situation you have faced in F&B Service and how did you solve it?",
+"Why should we hire you for this F&B Service position?"
+],
+
+"Facility Management":[
+"Good morning. Please introduce yourself and explain your experience relevant to facility management.",
+"What are the main responsibilities of a facility management team?",
+"If five employees suddenly do not report for duty, how would you manage the manpower?",
+"How would you handle a complaint from an important client about poor housekeeping?",
+"How do you monitor attendance and discipline of manpower?",
+"What would you do if a worker repeatedly violates safety rules?",
+"How would you manage an emergency such as water leakage, electrical failure or fire?",
+"How do you make sure housekeeping and maintenance work is completed on time?",
+"Give me an example of a difficult manpower or operational problem and explain how you solved it.",
+"Why should we select you as a Facility Management professional?"
+],
+
+"Facility Supervisor":[
+"Please introduce yourself and explain why you want to work as a Facility Supervisor.",
+"What are the daily responsibilities of a Facility Supervisor?",
+"If several workers are absent at the beginning of a shift, what will you do?",
+"How will you deal with a worker who refuses to follow your instructions?",
+"A client complains that the cleaning standard is poor. What steps will you take?",
+"How will you check the quality of housekeeping work?",
+"What will you do during an emergency at the facility?",
+"How do you maintain attendance, discipline and manpower records?",
+"Describe a difficult situation where you had to manage a team under pressure.",
+"Why should we hire you as a Facility Supervisor?"
+],
+
+"Front Office":[
+"Please introduce yourself and tell me about your hospitality experience.",
+"How would you welcome a guest at the front desk?",
+"What would you do if a guest arrives before check-in time?",
+"How would you handle an angry guest?",
+"Explain the check-in and check-out process.",
+"What information should a front office employee provide to a guest?",
+"How would you handle a reservation problem?",
+"What would you do if the hotel is fully booked?",
+"Describe a difficult guest situation and how you would solve it.",
+"Why should we hire you for front office?"
+],
+
+"Housekeeping":[
+"Please introduce yourself and tell me about your housekeeping experience.",
+"What are the main duties of a housekeeping attendant?",
+"Explain how you would clean and prepare a guest room.",
+"How would you handle a guest complaint about room cleanliness?",
+"What safety precautions are important while using cleaning chemicals?",
+"How do you maintain hygiene standards?",
+"What would you do if you found a valuable item in a guest room?",
+"How would you manage multiple rooms when you are under time pressure?",
+"Tell me about a difficult housekeeping situation and how you solved it.",
+"Why should we hire you?"
+],
+
+"Chef / Kitchen":[
+"Please introduce yourself and explain your kitchen experience.",
+"What are your main responsibilities in a professional kitchen?",
+"How do you maintain food hygiene and safety?",
+"What would you do if a customer sends food back?",
+"Explain cross-contamination and how you prevent it.",
+"How do you manage kitchen work during peak hours?",
+"What would you do if an important ingredient suddenly becomes unavailable?",
+"How do you maintain portion and quality control?",
+"Tell me about a difficult kitchen situation you have handled.",
+"Why should we hire you as a kitchen professional?"
+],
+
+"Security":[
+"Please introduce yourself and explain your security experience.",
+"What are the main responsibilities of a security guard?",
+"How would you handle an unauthorized person entering the premises?",
+"What would you do during a fire emergency?",
+"How do you maintain an incident report?",
+"How would you deal with an aggressive visitor?",
+"What is the importance of CCTV monitoring?",
+"How do you maintain discipline during a long shift?",
+"Describe a difficult security situation and how you would handle it.",
+"Why should we hire you?"
+],
+
+"Lab Attendant / MTS":[
+"Please introduce yourself and explain your relevant experience.",
+"What are the main duties of a Lab Attendant?",
+"How do you maintain cleanliness and safety in a laboratory?",
+"What would you do if you noticed unsafe equipment?",
+"How would you maintain laboratory materials and records?",
+"How do you follow instructions from a senior officer?",
+"What would you do if two urgent tasks were assigned to you?",
+"How would you handle an accident or emergency in the workplace?",
+"Describe a difficult work situation and how you solved it.",
+"Why should we hire you for this position?"
+],
+
+"HR / Administration":[
+"Please introduce yourself and explain your administrative experience.",
+"What are the main responsibilities of HR and administration?",
+"How would you handle an employee complaint?",
+"How would you manage attendance and leave records?",
+"What would you do if an employee repeatedly violates company rules?",
+"How would you maintain confidential employee information?",
+"How would you handle a conflict between two employees?",
+"How do you prioritize multiple administrative tasks?",
+"Describe a difficult employee-related situation and how you would solve it.",
+"Why should we hire you?"
+]
+
+};
+
+
+function speak(text){
+
+const language=document.getElementById("language").value;
+
+if("speechSynthesis" in window){
+
+window.speechSynthesis.cancel();
+
+let speech=new SpeechSynthesisUtterance(text);
+
+speech.lang=language;
+speech.rate=0.9;
+speech.pitch=1;
+
+window.speechSynthesis.speak(speech);
+
+}
+
+}
+
+
+function startInterview(){
+
+let job=document.getElementById("job").value;
+
+questions=jobQuestions[job];
+
+current=0;
+answers=[];
+
+document.getElementById("setup").classList.add("hidden");
+document.getElementById("interview").classList.remove("hidden");
+
+document.getElementById("status").innerText=
+"AI HR Interview Started";
+
+askQuestion();
+
+}
+
+
+function askQuestion(){
+
+if(current>=questions.length){
+
+finishInterview();
+return;
+
+}
+
+let q=questions[current];
+
+document.getElementById("question").innerText=
+"Question "+(current+1)+" of 10\n\n"+q;
+
+document.getElementById("answer").innerText=
+"Press ANSWER NOW and speak.";
+
+speak(q);
+
+}
+
+
+function startListening(){
+
+const SpeechRecognition=
+window.SpeechRecognition ||
+window.webkitSpeechRecognition;
+
+if(!SpeechRecognition){
+
+alert("Voice recognition is not supported in this browser. Please use Google Chrome.");
+
+return;
+}
+
+recognition=new SpeechRecognition();
+
+recognition.lang=
+document.getElementById("language").value;
+
+recognition.continuous=false;
+recognition.interimResults=false;
+
+document.getElementById("status").innerText=
+"🎤 Listening... Please answer.";
+
+document.getElementById("answer").innerText=
+"Listening to your answer...";
+
+recognition.start();
+
+recognition.onresult=function(event){
+
+let text=event.results[0][0].transcript;
+
+answers.push(text);
+
+document.getElementById("answer").innerText=text;
+
+document.getElementById("status").innerText=
+"Answer received. Preparing next question...";
+
+setTimeout(function(){
+
+current++;
+
+askQuestion();
+
+},1800);
+
+};
+
+recognition.onerror=function(){
+
+document.getElementById("status").innerText=
+"Voice not detected. Please try again.";
+
+};
+
+}
+
+
+function stopListening(){
+
+if(recognition){
+
+recognition.stop();
+
+}
+
+}
+
+
+function finishInterview(){
+
+window.speechSynthesis.cancel();
+
+document.getElementById("interview").classList.add("hidden");
+document.getElementById("result").classList.remove("hidden");
+
+let answered=answers.filter(a=>a && a.trim().length>10).length;
+
+let score=Math.round((answered/10)*100);
+
+document.getElementById("score").innerText=
+score+"/100";
+
+document.getElementById("resultText").innerText=
+"You completed the 10-question voice interview. "+
+"You answered "+answered+" questions with a recorded response. "+
+"In the full AI version, your answers will be evaluated for communication, technical knowledge, confidence, relevance and problem solving.";
+
+speak("Thank you. Your interview is complete. Your interview report is now ready.");
+
+}
+
+</script>
+
+</body>
+</html>
