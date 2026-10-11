@@ -347,32 +347,114 @@ function repeatQuestion(){
  if(questions[current])speak(questions[current]);
 }
 
-function startListening(){
- const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
- if(!SR){alert("Voice recognition needs Google Chrome.");return;}
- if(!running)return;
 
- if(recognition){try{recognition.stop();}catch(e){}}
- recognition=new SR();
- recognition.lang=document.getElementById("language").value;
- recognition.continuous=false;
- recognition.interimResults=false;
- document.getElementById("status").innerText="Listening... Please answer.";
+function startListening() {
+  const answerBox = document.getElementById("answer");
+  const statusBox = document.getElementById("status");
 
- recognition.onresult=function(e){
-  answers[current]=e.results[0][0].transcript;
-  document.getElementById("answer").innerText=answers[current];
-  document.getElementById("status").innerText="Answer received. Next question in 3 seconds.";
-  setTimeout(function(){
-   if(running){current++;askQuestion();}
-  },3000);
- };
- recognition.onerror=function(){
-  document.getElementById("status").innerText="Voice not detected. Check microphone permission and try again.";
- };
- try{recognition.start();}
- catch(e){document.getElementById("status").innerText="Microphone busy. Try again.";}
+  const SR =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+  // If browser voice recognition is unavailable,
+  // allow Android keyboard voice typing as a fallback.
+  if (!SR) {
+    answerBox.innerHTML = "";
+
+    const input = document.createElement("textarea");
+    input.id = "manualVoiceAnswer";
+    input.placeholder =
+      "Tap here and use your keyboard microphone to speak your answer.";
+    input.rows = 4;
+    input.style.width = "100%";
+    input.style.fontSize = "16px";
+    input.style.padding = "12px";
+
+    const saveButton = document.createElement("button");
+    saveButton.textContent = "SAVE ANSWER & NEXT QUESTION";
+
+    saveButton.onclick = function () {
+      const text = input.value.trim();
+
+      if (!text) {
+        statusBox.innerText =
+          "Please speak using your keyboard microphone or type your answer.";
+        return;
+      }
+
+      answers[current] = text;
+      answerBox.innerText = text;
+      statusBox.innerText = "Answer saved.";
+
+      current++;
+
+      setTimeout(function () {
+        askQuestion();
+      }, 1000);
+    };
+
+    answerBox.appendChild(input);
+    answerBox.appendChild(saveButton);
+
+    statusBox.innerText =
+      "Browser voice recognition is unavailable. Tap the answer box, then use the microphone on your phone keyboard.";
+    input.focus();
+    return;
+  }
+
+  if (typeof running !== "undefined" && running === false) {
+    statusBox.innerText = "Please start the interview first.";
+    return;
+  }
+
+  try {
+    if (recognition) {
+      try {
+        recognition.stop();
+      } catch (e) {}
+    }
+
+    recognition = new SR();
+    recognition.lang =
+      document.getElementById("language").value;
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    statusBox.innerText = "Listening... Please answer.";
+
+    recognition.onresult = function (event) {
+      const text = event.results[0][0].transcript.trim();
+
+      if (!text) {
+        statusBox.innerText = "No answer detected. Please try again.";
+        return;
+      }
+
+      answers[current] = text;
+      answerBox.innerText = text;
+      statusBox.innerText = "Answer received. Next question in 3 seconds.";
+
+      setTimeout(function () {
+        if (typeof running === "undefined" || running) {
+          current++;
+          askQuestion();
+        }
+      }, 3000);
+    };
+
+    recognition.onerror = function (event) {
+      statusBox.innerText =
+        "Voice error: " + event.error +
+        ". Please allow microphone access or use keyboard voice typing.";
+    };
+
+    recognition.start();
+  } catch (e) {
+    statusBox.innerText =
+      "Could not start voice recognition. Please use your keyboard microphone.";
+  }
 }
+
 
 function stopListening(){
  if(recognition){try{recognition.stop();}catch(e){}}
