@@ -1,117 +1,46 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>RK HR-AI Voice Interview Coach</title>
-
 <style>
 *{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:#f3f6fb;
-  color:#172033;
-}
-header{
-  background:linear-gradient(135deg,#123c69,#1769aa);
-  color:white;
-  padding:25px 15px;
-  text-align:center;
-}
-header h1{margin:0 0 8px}
-.container{
-  max-width:850px;
-  margin:auto;
-  padding:18px;
-}
-.card{
-  background:white;
-  padding:22px;
-  margin:15px 0;
-  border-radius:15px;
-  box-shadow:0 3px 15px #0001;
-}
-label{
-  display:block;
-  font-weight:bold;
-  margin:14px 0 7px;
-}
-input,select,button{
-  width:100%;
-  padding:13px;
-  border-radius:9px;
-  border:1px solid #ccd3dd;
-  font-size:16px;
-}
-button{
-  border:0;
-  background:#1769aa;
-  color:white;
-  font-weight:bold;
-  cursor:pointer;
-  margin-top:12px;
-}
-button:hover{opacity:.9}
-.voice{
-  text-align:center;
-  font-size:55px;
-  margin:15px;
-}
-.status{
-  text-align:center;
-  font-weight:bold;
-  padding:12px;
-  border-radius:10px;
-  background:#eef5ff;
-}
-.question{
-  font-size:22px;
-  font-weight:bold;
-  line-height:1.5;
-  text-align:center;
-  padding:20px;
-}
-.answer{
-  min-height:100px;
-  background:#f7f8fa;
-  padding:15px;
-  border-radius:10px;
-  margin-top:15px;
-}
-.hidden{display:none}
-.score{
-  font-size:35px;
-  font-weight:bold;
-  text-align:center;
-}
-ul{line-height:1.8}
-.small{
-  color:#667085;
-  font-size:14px;
-}
+body{margin:0;font-family:Arial,sans-serif;background:#f3f6fb;color:#172033}
+header{background:linear-gradient(135deg,#123c69,#1769aa);color:white;padding:22px;text-align:center}
+.container{max-width:850px;margin:auto;padding:16px}
+.card{background:white;padding:20px;margin:14px 0;border-radius:14px;box-shadow:0 3px 15px #0001}
+label{display:block;font-weight:bold;margin:14px 0 7px}
+input,select,button{width:100%;padding:12px;border-radius:9px;border:1px solid #ccd3dd;font-size:16px}
+button{background:#145da0;color:white;border:0;font-weight:bold;margin:8px 0}
+.hidden{display:none!important}
+.status{padding:12px;background:#edf4ff;border-radius:8px;margin:12px 0}
+.question{font-size:20px;line-height:1.5;font-weight:bold}
+.small{font-size:13px;color:#596579;line-height:1.5}
+.score{font-size:34px;font-weight:bold;text-align:center}
+video{width:100%;max-height:340px;background:#111}
+.checkline{display:flex;gap:10px;align-items:flex-start;font-weight:normal}
+.checkline input{width:auto}
 </style>
 </head>
-
 <body>
-
 <header>
 <h1>🤖 RK HR-AI Voice Interview Coach</h1>
-<p>Real Voice Interview Practice</p>
+<p>Voice Interview Practice • Hindi / English</p>
 </header>
 
 <div class="container">
+<section class="card" id="setup">
+<h2>Interview Setup</h2>
 
-<div class="card" id="setup">
+<label>Upload Resume *</label>
+<input type="file" id="resume" accept=".pdf,.txt,.doc,.docx" required>
 
-<h2>🎯 Interview Setup</h2>
+<label>Candidate Full Name *</label>
+<input id="candidateName" placeholder="Enter full name" required>
 
-<label>Upload Resume</label>
-<input type="file" id="resume" accept=".pdf,.txt,.doc,.docx">
-
-<p class="small">
-Resume upload will be connected to AI resume analysis in the next backend version.
-</p>
+<label>Mobile Number *</label>
+<input id="candidateMobile" type="tel" placeholder="10-digit mobile number" maxlength="10" required>
 
 <label>Applying For</label>
 <select id="job">
@@ -138,352 +67,347 @@ Resume upload will be connected to AI resume analysis in the next backend versio
 <option>Expert</option>
 </select>
 
+<p class="small">Camera recording is optional. If enabled, the video is recorded in the browser and can be saved after the interview. This page does not upload the video to the company.</p>
+
+<label class="checkline">
+<input type="checkbox" id="cameraConsent">
+I consent to camera access and local video recording.
+</label>
+
+<label class="checkline">
+<input type="checkbox" id="privacyConsent">
+I agree to use my name and mobile number for this interview.
+</label>
+
 <button onclick="startInterview()">🎙️ START VOICE INTERVIEW</button>
+</section>
 
+<section class="card hidden" id="interview">
+<div class="status" id="status">Preparing interview...</div>
+<div class="question" id="question"></div>
+<div class="card">
+<b>Your Answer</b>
+<p id="answer">Press ANSWER NOW and speak.</p>
 </div>
-
-
-<div class="card hidden" id="interview">
-
-<div class="voice">🎙️</div>
-
-<div class="status" id="status">
-AI HR is preparing your interview...
-</div>
-
-<div class="question" id="question">
-Please wait...
-</div>
-
-<div class="answer">
-<strong>Your Voice Answer:</strong>
-<p id="answer">Listening...</p>
-</div>
-
+<video id="cameraPreview" class="hidden" autoplay muted playsinline></video>
+<p class="small" id="gazeStatus"></p>
 <button onclick="startListening()">🎤 ANSWER NOW</button>
+<button onclick="stopListening()">⏹ STOP ANSWER</button>
+<button onclick="repeatQuestion()">🔊 REPEAT QUESTION</button>
+<button onclick="finishInterview(true)">Finish Interview</button>
+</section>
 
-<button onclick="stopListening()">
-⏹️ STOP ANSWER
-</button>
-
-</div>
-
-
-<div class="card hidden" id="result">
-
-<h2>📊 Interview Report</h2>
-
+<section class="card hidden" id="result">
+<h2>Interview Practice Report</h2>
 <div class="score" id="score">0/100</div>
-
 <p id="resultText"></p>
-
-<h3>Preparation Areas</h3>
-
-<ul>
-<li>Improve job-specific technical knowledge.</li>
-<li>Practice answering without hesitation.</li>
-<li>Give practical examples from your experience.</li>
-<li>Improve communication and confidence.</li>
-<li>Prepare for situation-based questions.</li>
-</ul>
-
-<button onclick="location.reload()">
-🔄 Practice Again
-</button>
-
+<p class="small">This score measures the number of answers recorded. It is not an AI evaluation of answer quality.</p>
+<button id="downloadVideoBtn" class="hidden" onclick="downloadVideo()">⬇️ Save Interview Video</button>
+<button onclick="location.reload()">Practice Again</button>
+</section>
 </div>
-
-</div>
-
 
 <script>
-
-let questions = [];
-let current = 0;
-let answers = [];
-let recognition;
-let interviewStarted = false;
-
-const jobQuestions = {
-
+const departments = {
 "F&B Service":[
-"Good morning. Please introduce yourself and tell me about your F&B Service experience.",
-"You have experience in F&B Service. Explain your main responsibilities in your previous job.",
-"Explain the complete sequence of restaurant service from welcoming a guest to billing.",
-"A guest says that his food is delayed and becomes angry. How would you handle the situation?",
-"What is the difference between buffet service and a la carte service?",
-"Suppose a guest complains that the food is not prepared according to his requirement. What will you do?",
-"How would you maintain hygiene and food safety during restaurant service?",
-"If three tables require service at the same time, how would you prioritize your work?",
-"What is the most difficult situation you have faced in F&B Service and how did you solve it?",
-"Why should we hire you for this F&B Service position?"
+"Introduce yourself and explain your experience.",
+"Explain the sequence of restaurant service.",
+"How do you handle a food allergy request?",
+"What is the difference between buffet and a la carte?",
+"How do you resolve a wrong order?",
+"How do you coordinate with the kitchen?",
+"What is mise en place?",
+"How do you handle an angry guest?",
+"Explain suggestive selling.",
+"How do you prepare for a banquet."
 ],
-
 "Facility Management":[
-"Good morning. Please introduce yourself and explain your experience relevant to facility management.",
-"What are the main responsibilities of a facility management team?",
-"If five employees suddenly do not report for duty, how would you manage the manpower?",
-"How would you handle a complaint from an important client about poor housekeeping?",
-"How do you monitor attendance and discipline of manpower?",
-"What would you do if a worker repeatedly violates safety rules?",
-"How would you manage an emergency such as water leakage, electrical failure or fire?",
-"How do you make sure housekeeping and maintenance work is completed on time?",
-"Give me an example of a difficult manpower or operational problem and explain how you solved it.",
-"Why should we select you as a Facility Management professional?"
+"Introduce yourself and explain your experience.",
+"How do you plan preventive maintenance?",
+"How do you handle a water leak?",
+"How do you monitor housekeeping quality?",
+"How do you manage vendor performance?",
+"How do you handle a client complaint?",
+"How do you manage absent staff?",
+"What belongs in a daily facility report?",
+"How do you reduce costs safely?",
+"How do you respond to a fire alarm?"
 ],
-
 "Facility Supervisor":[
-"Please introduce yourself and explain why you want to work as a Facility Supervisor.",
-"What are the daily responsibilities of a Facility Supervisor?",
-"If several workers are absent at the beginning of a shift, what will you do?",
-"How will you deal with a worker who refuses to follow your instructions?",
-"A client complains that the cleaning standard is poor. What steps will you take?",
-"How will you check the quality of housekeeping work?",
-"What will you do during an emergency at the facility?",
-"How do you maintain attendance, discipline and manpower records?",
-"Describe a difficult situation where you had to manage a team under pressure.",
-"Why should we hire you as a Facility Supervisor?"
+"Introduce yourself and your supervisory experience.",
+"How do you allocate duties on a shift?",
+"How do you handle staff refusing instructions?",
+"How do you inspect cleaning quality?",
+"How do you report an accident?",
+"How do you prepare a shift handover?",
+"How do you manage absenteeism?",
+"How do you coach underperforming staff?",
+"How do you handle client complaints?",
+"How do you ensure PPE compliance?"
 ],
-
 "Front Office":[
-"Please introduce yourself and tell me about your hospitality experience.",
-"How would you welcome a guest at the front desk?",
-"What would you do if a guest arrives before check-in time?",
-"How would you handle an angry guest?",
-"Explain the check-in and check-out process.",
-"What information should a front office employee provide to a guest?",
-"How would you handle a reservation problem?",
-"What would you do if the hotel is fully booked?",
-"Describe a difficult guest situation and how you would solve it.",
-"Why should we hire you for front office?"
+"Introduce yourself and describe your experience.",
+"Explain the hotel check-in process.",
+"How do you handle an angry guest?",
+"How do you manage a fully booked hotel?",
+"How do you handle a billing dispute?",
+"How do you coordinate with housekeeping?",
+"How do you protect guest information?",
+"What do you do if the system goes offline?",
+"How do you manage a reception queue?",
+"How do you correct a reservation error?"
 ],
-
 "Housekeeping":[
-"Please introduce yourself and tell me about your housekeeping experience.",
-"What are the main duties of a housekeeping attendant?",
-"Explain how you would clean and prepare a guest room.",
-"How would you handle a guest complaint about room cleanliness?",
-"What safety precautions are important while using cleaning chemicals?",
-"How do you maintain hygiene standards?",
-"What would you do if you found a valuable item in a guest room?",
-"How would you manage multiple rooms when you are under time pressure?",
-"Tell me about a difficult housekeeping situation and how you solved it.",
-"Why should we hire you?"
+"Introduce yourself and your experience.",
+"Explain the correct room-cleaning sequence.",
+"How do you handle a cleanliness complaint?",
+"How do you safely use cleaning chemicals?",
+"What do you do with lost property?",
+"How do you prevent cross-contamination?",
+"How do you report maintenance defects?",
+"How do you prioritise rooms under pressure?",
+"How do you handle a chemical spill safely?",
+"How do you inspect a room before release?"
 ],
-
 "Chef / Kitchen":[
-"Please introduce yourself and explain your kitchen experience.",
-"What are your main responsibilities in a professional kitchen?",
-"How do you maintain food hygiene and safety?",
-"What would you do if a customer sends food back?",
-"Explain cross-contamination and how you prevent it.",
-"How do you manage kitchen work during peak hours?",
-"What would you do if an important ingredient suddenly becomes unavailable?",
-"How do you maintain portion and quality control?",
-"Tell me about a difficult kitchen situation you have handled.",
-"Why should we hire you as a kitchen professional?"
+"Introduce yourself and your kitchen experience.",
+"How do you prevent cross-contamination?",
+"Explain FIFO food storage.",
+"How do you maintain food safety?",
+"How do you handle a returned dish?",
+"How do you plan mise en place?",
+"What do you do if refrigeration fails?",
+"How do you manage peak-hour orders?",
+"How do you reduce food waste?",
+"How do you handle an allergy request?"
 ],
-
 "Security":[
-"Please introduce yourself and explain your security experience.",
-"What are the main responsibilities of a security guard?",
-"How would you handle an unauthorized person entering the premises?",
-"What would you do during a fire emergency?",
-"How do you maintain an incident report?",
-"How would you deal with an aggressive visitor?",
-"What is the importance of CCTV monitoring?",
-"How do you maintain discipline during a long shift?",
-"Describe a difficult security situation and how you would handle it.",
-"Why should we hire you?"
+"Introduce yourself and your security experience.",
+"How do you verify visitor authorisation?",
+"What do you do during a fire emergency?",
+"How do you write an incident report?",
+"How do you handle an aggressive visitor?",
+"How do you conduct a patrol?",
+"What do you do with an unattended bag?",
+"How do you protect confidential information?",
+"How do you manage shift handover?",
+"How do you respond to a medical emergency?"
 ],
-
 "Lab Attendant / MTS":[
-"Please introduce yourself and explain your relevant experience.",
-"What are the main duties of a Lab Attendant?",
-"How do you maintain cleanliness and safety in a laboratory?",
-"What would you do if you noticed unsafe equipment?",
-"How would you maintain laboratory materials and records?",
-"How do you follow instructions from a senior officer?",
-"What would you do if two urgent tasks were assigned to you?",
-"How would you handle an accident or emergency in the workplace?",
-"Describe a difficult work situation and how you solved it.",
-"Why should we hire you for this position?"
+"Introduce yourself and explain your experience.",
+"How do you maintain laboratory cleanliness?",
+"What do you do if equipment is unsafe?",
+"How do you maintain stock registers?",
+"How do you handle a chemical spill safely?",
+"What protective equipment may be required?",
+"How do you prioritise urgent tasks?",
+"How do you report a workplace accident?",
+"How do you organise and label materials?",
+"How do you handle confidential records?"
 ],
-
 "HR / Administration":[
-"Please introduce yourself and explain your administrative experience.",
-"What are the main responsibilities of HR and administration?",
-"How would you handle an employee complaint?",
-"How would you manage attendance and leave records?",
-"What would you do if an employee repeatedly violates company rules?",
-"How would you maintain confidential employee information?",
-"How would you handle a conflict between two employees?",
-"How do you prioritize multiple administrative tasks?",
-"Describe a difficult employee-related situation and how you would solve it.",
-"Why should we hire you?"
+"Introduce yourself and your HR experience.",
+"How do you handle employee complaints?",
+"How do you protect employee information?",
+"How do you maintain attendance records?",
+"How do you screen resumes fairly?",
+"How do you organise interviews?",
+"What checks are needed before an offer letter?",
+"How do you handle payroll data errors?",
+"How do you manage confidential documents?",
+"How do you prioritise administrative tasks?"
 ]
-
 };
 
+const commonQuestions=[
+"Describe a difficult work situation and how you solved it.",
+"How do you prioritise several urgent tasks?",
+"How do you communicate with colleagues?",
+"How do you handle feedback about your work?",
+"What safety risks are common in this role?",
+"How would you respond to a workplace emergency?",
+"How do you maintain accurate records?",
+"Why should we hire you?",
+"How do you maintain professional conduct?",
+"How do you respond to a customer complaint?",
+"How do you support a new team member?",
+"What would you do if you made a mistake?",
+"How do you protect confidential information?",
+"How do you follow standard procedures?",
+"How do you manage pressure during busy periods?",
+"What would you do if a colleague ignored a safety rule?",
+"How do you identify and report a hazard?",
+"How do you ensure quality in your daily work?",
+"How do you handle a shortage of supplies?",
+"How would you resolve a workplace disagreement?",
+"How do you organise your shift?",
+"What would you include in a handover report?",
+"How do you respond to changed instructions?",
+"How do you maintain punctuality?",
+"How do you avoid waste and control costs?",
+"How do you learn a new procedure?",
+"How do you check your work before completion?",
+"How do you respond to an unfair customer demand?",
+"How do you handle confidential documents?",
+"How would you improve this department?"
+];
+
+let questions=[];
+let current=0;
+let answers=[];
+let recognition=null;
+let stream=null;
+let recorder=null;
+let videoChunks=[];
+let videoBlob=null;
+let running=false;
+
+function makeQuestions(department){
+ let base=[...departments[department],...commonQuestions];
+ while(base.length<40){
+  base.push("Give a practical example of how you would handle a difficult situation in "+department+".");
+ }
+ return base.slice(0,40);
+}
 
 function speak(text){
-
-const language=document.getElementById("language").value;
-
-if("speechSynthesis" in window){
-
-window.speechSynthesis.cancel();
-
-let speech=new SpeechSynthesisUtterance(text);
-
-speech.lang=language;
-speech.rate=0.9;
-speech.pitch=1;
-
-window.speechSynthesis.speak(speech);
-
+ window.speechSynthesis.cancel();
+ let speech=new SpeechSynthesisUtterance(text);
+ speech.lang=document.getElementById("language").value;
+ window.speechSynthesis.speak(speech);
 }
 
+async function startInterview(){
+ const resume=document.getElementById("resume").files[0];
+ const name=document.getElementById("candidateName").value.trim();
+ const mobile=document.getElementById("candidateMobile").value.trim();
+
+ if(!resume){alert("Please upload your resume first.");return;}
+ if(!name){alert("Please enter your full name.");return;}
+ if(!/^[6-9][0-9]{9}$/.test(mobile)){
+  alert("Enter a valid 10-digit Indian mobile number.");return;
+ }
+ if(!document.getElementById("privacyConsent").checked){
+  alert("Please accept the privacy notice.");return;
+ }
+
+ if(document.getElementById("cameraConsent").checked){
+  try{
+   stream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+   const video=document.getElementById("cameraPreview");
+   video.srcObject=stream;
+   video.classList.remove("hidden");
+   startRecording();
+  }catch(e){
+   alert("Camera permission denied. Allow camera access or uncheck camera consent.");
+   return;
+  }
+ }
+ beginInterview();
 }
 
-
-function startInterview(){
-
-let job=document.getElementById("job").value;
-
-questions=jobQuestions[job];
-
-current=0;
-answers=[];
-
-document.getElementById("setup").classList.add("hidden");
-document.getElementById("interview").classList.remove("hidden");
-
-document.getElementById("status").innerText=
-"AI HR Interview Started";
-
-askQuestion();
-
+function startRecording(){
+ if(!window.MediaRecorder||!stream)return;
+ try{
+  videoChunks=[];
+  recorder=new MediaRecorder(stream);
+  recorder.ondataavailable=e=>{
+   if(e.data.size)videoChunks.push(e.data);
+  };
+  recorder.onstop=()=>{
+   videoBlob=new Blob(videoChunks,{type:recorder.mimeType||"video/webm"});
+   document.getElementById("downloadVideoBtn").classList.remove("hidden");
+  };
+  recorder.start();
+ }catch(e){}
 }
 
+function beginInterview(){
+ questions=makeQuestions(document.getElementById("job").value);
+ current=0;
+ answers=[];
+ running=true;
+ document.getElementById("setup").classList.add("hidden");
+ document.getElementById("interview").classList.remove("hidden");
+ document.getElementById("gazeStatus").innerText=
+ "Please look toward the camera while answering. Automatic eye-direction detection is not included in this version.";
+ askQuestion();
+}
 
 function askQuestion(){
-
-if(current>=questions.length){
-
-finishInterview();
-return;
-
+ if(current>=questions.length){finishInterview(false);return;}
+ document.getElementById("question").innerText=
+ "Question "+(current+1)+" of 40: "+questions[current];
+ document.getElementById("answer").innerText="Press ANSWER NOW and speak.";
+ document.getElementById("status").innerText="Question "+(current+1)+" of 40";
+ speak(questions[current]);
 }
 
-let q=questions[current];
-
-document.getElementById("question").innerText=
-"Question "+(current+1)+" of 10\n\n"+q;
-
-document.getElementById("answer").innerText=
-"Press ANSWER NOW and speak.";
-
-speak(q);
-
+function repeatQuestion(){
+ if(questions[current])speak(questions[current]);
 }
-
 
 function startListening(){
+ const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!SR){alert("Voice recognition needs Google Chrome.");return;}
+ if(!running)return;
 
-const SpeechRecognition=
-window.SpeechRecognition ||
-window.webkitSpeechRecognition;
+ if(recognition){try{recognition.stop();}catch(e){}}
+ recognition=new SR();
+ recognition.lang=document.getElementById("language").value;
+ recognition.continuous=false;
+ recognition.interimResults=false;
+ document.getElementById("status").innerText="Listening... Please answer.";
 
-if(!SpeechRecognition){
-
-alert("Voice recognition is not supported in this browser. Please use Google Chrome.");
-
-return;
+ recognition.onresult=function(e){
+  answers[current]=e.results[0][0].transcript;
+  document.getElementById("answer").innerText=answers[current];
+  document.getElementById("status").innerText="Answer received. Next question in 3 seconds.";
+  setTimeout(function(){
+   if(running){current++;askQuestion();}
+  },3000);
+ };
+ recognition.onerror=function(){
+  document.getElementById("status").innerText="Voice not detected. Check microphone permission and try again.";
+ };
+ try{recognition.start();}
+ catch(e){document.getElementById("status").innerText="Microphone busy. Try again.";}
 }
-
-recognition=new SpeechRecognition();
-
-recognition.lang=
-document.getElementById("language").value;
-
-recognition.continuous=false;
-recognition.interimResults=false;
-
-document.getElementById("status").innerText=
-"🎤 Listening... Please answer.";
-
-document.getElementById("answer").innerText=
-"Listening to your answer...";
-
-recognition.start();
-
-recognition.onresult=function(event){
-
-let text=event.results[0][0].transcript;
-
-answers.push(text);
-
-document.getElementById("answer").innerText=text;
-
-document.getElementById("status").innerText=
-"Answer received. Preparing next question...";
-
-setTimeout(function(){
-
-current++;
-
-askQuestion();
-
-},1800);
-
-};
-
-recognition.onerror=function(){
-
-document.getElementById("status").innerText=
-"Voice not detected. Please try again.";
-
-};
-
-}
-
 
 function stopListening(){
-
-if(recognition){
-
-recognition.stop();
-
+ if(recognition){try{recognition.stop();}catch(e){}}
 }
 
+function finishInterview(manual){
+ if(!running)return;
+ running=false;
+ window.speechSynthesis.cancel();
+ stopListening();
+
+ if(recorder&&recorder.state!=="inactive")recorder.stop();
+ if(stream)stream.getTracks().forEach(track=>track.stop());
+
+ document.getElementById("interview").classList.add("hidden");
+ document.getElementById("result").classList.remove("hidden");
+
+ const answered=answers.filter(a=>a&&a.trim().length>0).length;
+ document.getElementById("score").innerText=Math.round(answered/40*100)+"/100";
+ document.getElementById("resultText").innerText=
+ "Candidate: "+document.getElementById("candidateName").value+
+ " | Department: "+document.getElementById("job").value+
+ ". Answers recorded: "+answered+" of 40."+
+ (manual&&current<40?" Interview ended early.":"");
 }
 
-
-function finishInterview(){
-
-window.speechSynthesis.cancel();
-
-document.getElementById("interview").classList.add("hidden");
-document.getElementById("result").classList.remove("hidden");
-
-let answered=answers.filter(a=>a && a.trim().length>10).length;
-
-let score=Math.round((answered/10)*100);
-
-document.getElementById("score").innerText=
-score+"/100";
-
-document.getElementById("resultText").innerText=
-"You completed the 10-question voice interview. "+
-"You answered "+answered+" questions with a recorded response. "+
-"In the full AI version, your answers will be evaluated for communication, technical knowledge, confidence, relevance and problem solving.";
-
-speak("Thank you. Your interview is complete. Your interview report is now ready.");
-
+function downloadVideo(){
+ if(!videoBlob)return;
+ const url=URL.createObjectURL(videoBlob);
+ const link=document.createElement("a");
+ link.href=url;
+ link.download="RK-HR-AI-Interview.webm";
+ link.click();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
-
 </script>
-
 </body>
 </html>
